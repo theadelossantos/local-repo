@@ -152,16 +152,6 @@ EMAIL_HOST_USER = 'mdrrmcibaanreports@gmail.com'
 EMAIL_HOST_PASSWORD = 'yvge xuor bzxj bdrs'
 DEFAULT_FROM_EMAIL = 'mdrrmcibaan@gmail.com'
 
-AWS_ACCESS_KEY_ID = 'AKIA3JX7XVFN47CR4YPX'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'imagesavers'
-AWS_S3_SIGNATURE_NAME = 's3v4',
-AWS_S3_REGION_NAME = 'us-east-1'
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL =  None
-AWS_S3_VERITY = True
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
 OPENWEATHERMAP_API_KEY = '074b9e9f93888d463d148580ff82b8dd'
 
 
