@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-yh0u@+)9vg%1$blh=9_h_nfasl2_df83i@3wp1yd1f=o6#-3^s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -80,14 +80,13 @@ WSGI_APPLICATION = 'capstoneproject.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default':
-    {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
+        'NAME': 'mdrrmc_ibaan',
         'USER': 'postgres',
-        'PASSWORD': 'gafEEA3DGF1-fE3AgCGaD51-5F-a*daf',
-        'HOST': 'viaduct.proxy.rlwy.net',
-        'PORT': '31471',
+        'PASSWORD': 'theaclarisse',
+        'HOST': 'localhost',  
+        'PORT': '5432',
     }
 }
 
