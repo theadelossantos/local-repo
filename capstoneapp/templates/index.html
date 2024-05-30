@@ -261,55 +261,6 @@
                     }
                 });
             }
-            $("#barangaySelect").change(function () {
-                const selectedBarangayId = $(this).val();
-
-                $.ajax({
-                    url: "{% url 'get_all_reports' %}",
-                    method: "GET",
-                    data: { barangay: selectedBarangayId },
-                    dataType: "json",
-                    success: function (data) {
-                        updateReportsTable(data.reports, 'all-reports-table');
-                        paginationData = data.pagination; 
-                        console.log(data)
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error fetching reports by barangay: " + error);
-                        console.log(xhr.responseText);
-                    }
-                });
-            });
-
-            function populateBarangaysDropdown(barangays) {
-                const barangaySelect = $("#barangaySelect");
-
-                barangaySelect.empty(); 
-
-                barangaySelect.append('<option selected disabled>Barangay</option>');
-
-                barangays.forEach(barangay => {
-                    const option = `<option value="${barangay.barangay}">${barangay.barangay}</option>`;
-                    barangaySelect.append(option);
-                });
-            }
-
-            function fetchBarangays() {
-                $.ajax({
-                    url: '/get_barangays/',
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        console.log('Received barangays:', data);
-                        populateBarangaysDropdown(data);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error fetching barangays:', error);
-                    }
-                });
-            }
-
-            fetchBarangays();
                 
         $(document).on("click", "tr[data-toggle='modal']", function () {
                 const reportId = $(this).data("report-id");
@@ -319,7 +270,6 @@
                   attachment: $(this).data("attachment"),
                   date_reported: $(this).data("date-reported"),
                   time_reported: $(this).data("time-reported"),
-                  response_status: $(this).data("status"),
                   respondent_name: $(this).data("respondent-name")
 
                 };
@@ -330,35 +280,21 @@
             $("#exportPdfButton").on("click", function () {
               if (selectedReport) {
                 var doc = new jsPDF();
-                var logos = [
-                    "{% static 'capstoneapp/ibaanlogo1.png' %}",
-                    "{% static 'capstoneapp/ibaanlogo2.png' %}",
+                var logoUrl = "{% static 'capstoneapp/ibaanlogo1.png' %}";
+                doc.addImage(logoUrl, 'PNG', 10, 10, 30, 30);
 
-                ]
-                var logoWidth = 20;
-                var centerX = doc.internal.pageSize.width / 2 - (logoWidth * 2) / 2;
-                var startY = 20;
-
-                logos.forEach(function (logo, index) {
-                    doc.addImage(logo, 'PNG', centerX + index * logoWidth, startY, logoWidth, logoWidth);
-                });
-
-                var headerText = "MUNICIPAL DISASTER RISK REDUCTION AND MANAGEMENT OFFICE";
-                doc.setFontSize(15);
+                var headerText = selectedReport.subject;
+                doc.setFontSize(18);
                 var textWidth = doc.getStringUnitWidth(headerText) * doc.internal.getFontSize();
                 var pageWidth = doc.internal.pageSize.width;
                 var textX = (pageWidth - textWidth) / 2;
-                var headerY = startY + logoWidth + 7; 
-                doc.setFont(undefined, 'bold');
-                doc.text(headerText, pageWidth / 2, headerY, 'center');
-
+                doc.text(headerText, pageWidth / 2, 20, 'center'); 
                 const formattedDate = formatDateString(selectedReport.date_reported);
 
                 var columns = ["Field", "Details"];
                 var data = [
                   ["Subject", selectedReport.subject],
                   ["Date Reported", formattedDate],
-                  ["Barangay", selectedReport.barangay],
                   ["Description", selectedReport.description],
                   ["Location", $("#modalLocation").text()],
                   ["Status", selectedReport.response_status],
@@ -377,7 +313,8 @@
                   body: data,
                   theme: "striped",
                   columnStyles: columnStyles,
-                  margin: { top: startY + logoWidth + 20 },                
+                  margin: { top: 50 },              
+                
               });
               if (selectedReport.attachment) {
                 var img = new Image();
@@ -407,9 +344,8 @@
 
               }
             });
-            
         });
-        
+
         async function exportAllReportsToPDF(allBarangays) {
             try{
                 const response = await fetch('/get_all_reports_without_pagination/');
@@ -454,13 +390,16 @@
                     var selectedReport = {
                         subject: allBarangays[index].subject,
                         date_reported: allBarangays[index].date_reported,
+                        time_reported: allBarangays[index].time_reported,
                         description: allBarangays[index].description,
                         location: allBarangays[index].location,
                         attachment: allBarangays[index].attachment,
                         barangay: allBarangays[index].barangay, 
                         longitude: allBarangays[index].longitude,
                         latitude: allBarangays[index].latitude,
-                        response_status: allBarangays[index].response_status
+                        response_status: allBarangays[index].response_status,
+                        respondent_name: allBarangays[index].respondent_name
+
                     };
     
                     doc.addPage();
@@ -482,9 +421,11 @@
                     var data = [
                         ["Subject", selectedReport.subject],
                         ["Date Reported", selectedReport.date_reported],
+                        ["Time Reported", selectedReport.time_reported],
                         ["Barangay", selectedReport.barangay],
                         ["Description", selectedReport.description],
                         ["Status", selectedReport.response_status],
+                        ["Reported by", selectedReport.respondent_name],
 
                     ];
     
@@ -548,7 +489,7 @@
 
             }
         }
-
+        
         let marker;
 
         function displayReportDetails(reportId) {
@@ -565,7 +506,6 @@
                 data: { report_id: reportId },
                 dataType: "json",
                 success: function (data) {
-                    console.log('data', data)
                   const formattedDate = formatDateString(data.date_reported);
                   const formattedTime = formatTimeString(data.time_reported);
 
@@ -609,26 +549,8 @@
                         map = null;
                         }
                     });
-                    console.log('before ajax')
-                    $.ajax({
-                        url: `/get_response_status/${reportId}/`,
-                        method: "GET",
-                        success: function (getResponse) {
-                            console.log('AJAX Success - get_response_status:', getResponse);
-                            if (getResponse.success) {
-                                const responseStatus = getResponse.response_status;
-                                console.log('Response Status:', responseStatus);
-                                const selectElement = $(`select.response-select[data-report-id='${reportId}']`);
-                                selectElement.val(responseStatus).change();
-                            } else {
-                                console.error('Failed to fetch response status:', getResponse.error);
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('AJAX Error - get_response_status:', error);
-                            console.log('AJAX Error Details:', xhr);
-                        }
-                    });
+                    
+
                 },
                 error: function (xhr, status, error) {
                     console.error("Error fetching report details: " + error);
@@ -648,18 +570,9 @@
                     dataType: "json",
                     success: function (data) {
                         console.log("Success: Data received:", data);
-                        if (page === 1) {
-                            allBarangays = []; 
-                        }
-                        allBarangays = allBarangays.concat(data.reports);
                         updateReportsTable(data.reports, 'all-reports-table');
                         paginationData = data.pagination;
                         generatePagination(currentPage, paginationData.total_pages);
-                        console.log("Reports table updated with data:", data.reports); 
-
-                        // if (!paginationData.has_next) {
-                        //     exportAllReportsToPDF(allBarangays); 
-                        // }
                     },
                     error: function (xhr, status, error) {
                         console.error("Error fetching all reports: " + error);
@@ -685,16 +598,14 @@
                     loadAllReports(currentPage);
                 }
             });
+
             $('#exportAllPdfButton').click(function (e) {
                 e.preventDefault();
                 if (!paginationData.has_next | paginationData.has_next) {
                 exportAllReportsToPDF(allBarangays); 
                 }            
             });
-
-
-            loadAllReports(currentPage);
-
+            
             generatePagination(currentPage, paginationDataToday.total_pages); 
 
             function generatePagination(page, totalPages) {
@@ -777,6 +688,8 @@
             
         });
 
+        
+
         function updateReportsTable(reports, tableId) {
             console.log("Update function called for table ID:", tableId);
             const table = $(`#${tableId}`);
@@ -788,27 +701,13 @@
                 reports.forEach(function (report) {
                     const formattedDate = formatDateString(report.date_reported);
                     const formattedTime = formatTimeString(report.time_reported);
-                    
-                    let respondButton;
-                    if(report.responded){
-                        respondButton = "<span class='btn btn-sm btn-secondary'>Responded</span>";
-                    }else{
-                        respondButton = `<button class='btn btn-sm btn-primary respond-button' data-report-id='${report.id}'>Respond</button>`;
-                    }
 
-                    let declinedButton;
-                    if (report.responded || report.declined) {
-                        declinedButton = "<span class='btn btn-sm btn-secondary' disabled>Declined</span>";
-                    } else {
-                        declinedButton = `<button class='btn btn-sm btn-danger decline-button' data-report-id='${report.id}'>Decline</button>`;
-                    }
-
-                    const tableRow = `<tr data-toggle="modal" data-target="#reportModal" data-respondent-name="${report.respondent_name}" data-report-id="${report.id}" data-subject="${report.subject}" data-responded="${report.responded}" data-description="${report.description}" data-attachment="${report.attachment}" data-date-reported="${report.date_reported}" data-status="${report.response_status}">
+                    const tableRow = `<tr data-toggle="modal" data-target="#reportModal" data-respondent-name="${report.respondent_name}" data-status="{{ report.response_status }}" data-report-id="${report.id}" data-subject="${report.subject}" data-description="${report.description}" data-attachment="${report.attachment}" data-date-reported="${report.date_reported}">
                         <td>${report.subject}</td>
                         <td>${formattedDate}</td>
                         <td>${formattedTime}</td>
                         <td>${report.barangay}</td>
-                        <td>${report.response_status}</td>
+                        <td>${report.response_status }</td>
 
                     </tr>`;
                     table.append(tableRow);
@@ -841,119 +740,27 @@
                     console.error('Error fetching address:', error);
                 });
         }
-        function getAddressFromCoordinatesPDF(latitude, longitude) {
-            return new Promise((resolve, reject) => {
-                const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+        // $(document).ready(function() {
+        //     const urlParams = new URLSearchParams(window.location.search);
+        //     const success = urlParams.get('success');
 
-                fetch(apiUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        const address = data.display_name;
-                        resolve(address);
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            });
-        }
-        const csrfToken = "{{ csrf_token }}";
-
-        // $(document).on('click', '.respond-button', function () {
-        //     const reportId = $(this).data('report-id');
-
-        //     $.ajax({
-        //         type: 'POST',
-        //         url: '/update_report_responded/',
-        //         beforeSend: function(xhr, settings) {
-        //             xhr.setRequestHeader('X-CSRFToken', csrfToken); 
-        //         },
-        //         data: {
-        //             report_id: reportId,
-        //             responded: true
-        //         },
-        //         success: function (response) {
-        //             if (response.success) {
-        //                 $(`.respond-button[data-report-id='${reportId}']`).removeClass('btn-primary').addClass('btn-secondary').text('Responded');
-        //             } else {
-        //                 console.error('Failed to update responded status');
-        //             }
-        //         },
-        //         error: function (xhr, status, error) {
-        //             console.error('Error:', error);
-        //         }
-        //     });
-        // });
-        // $(document).on('click', '.decline-button', function () {
-        //     const reportId = $(this).data('report-id');
-
-        //     const confirmation = window.confirm('Are you sure you want to decline this report?');
+        //     if (success === 'true') {
             
-        //     if (confirmation) {
-        //         $.ajax({
-        //             type: 'POST',
-        //             url: '/update_report_declined/',
-        //             beforeSend: function (xhr, settings) {
-        //                 xhr.setRequestHeader('X-CSRFToken', csrfToken);
-        //             },
-        //             data: {
-        //                 report_id: reportId,
-        //                 declined: true
-        //             },
-        //             success: function (response) {
-        //                 if (response.success) {
-        //                     $(`.decline-button[data-report-id='${reportId}']`).removeClass('btn-warning').addClass('btn-danger').text('Declined');
-        //                 } else {
-        //                     console.error('Failed to update declined status');
-        //                 }
-        //             },
-        //             error: function (xhr, status, error) {
-        //                 console.error('Error:', error);
-        //             }
-        //         });
-        //     } else {
-        //         console.log('Decline operation canceled');
+        //     const alertContent = 'Report submitted successfully.';
+        //     const alertBox = `<div class="alert alert-success alert-dismissible fade show alert-fixed" role="alert">${alertContent}
+        //         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        //         <span aria-hidden="true">&times;</span>
+        //         </button>
+        //     </div>`;
+        //     $('#alert-container').html(alertBox);
+
+        //     setTimeout(function(){
+        //         $('.alert').alert('close');
+        //     }, 2000)
         //     }
         // });
-        $(document).ready(function() {
-            $('#reportModal').on('show.bs.modal', function(event) {
-                const button = $(event.relatedTarget);
-                const reportId = button.closest('tr').data('report-id');
-                $(this).find('#reportIdInput').val(reportId);
 
-            });
-            $('#reportModal').on('click', '.save-button', function() {
-                const reportId = $('#reportIdInput').val();
-                const selectedOption = $('.response-select').val();
-                console.log(reportId)
-                if (reportId && selectedOption) {
-                    $.ajax({
-                        type: 'POST',
-                        url: '/update_response_status/',
-                        beforeSend: function(xhr, settings) {
-                            xhr.setRequestHeader('X-CSRFToken', csrfToken); 
-                        },
-                        data: {
-                            report_id: reportId,
-                            response_status: selectedOption
-                        },
-                        success: function (response) {
-                            if (response.success) {
-                                console.log('Response status updated successfully');
-                                $('#reportModal').modal('hide');
-                            } else {
-                                console.error('Failed to update response status');
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('Error:', error);
-                        }
-                    });
-                } else {
-                    console.error('Report ID or selected option is missing');
-                }
-            });
-        });
-        
+
     </script>
     {% endblock %}
 

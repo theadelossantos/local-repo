@@ -672,13 +672,17 @@ def send_sms(to_phone_number, notification_message):
 
 def submit_report(request):
     if request.method == 'POST':
+        request.POST._mutable = True  
+        request.POST['response_status'] = 'Pending'
+        request.POST._mutable = False 
         serializer = ReportSerializer(data=request.POST)
         if serializer.is_valid():
             attachment = request.FILES.get('attachment')
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
+
             report = serializer.save(attachment=attachment, latitude=latitude, longitude=longitude)
-            messages.success(request, 'Report submitted successfully.')
+            # messages.success(request, 'Report submitted successfully.')
 
             subject = 'New Report Submitted'
             message = 'A new report has been submitted by a barangay user.'
@@ -701,7 +705,7 @@ def submit_report(request):
             # notification_message = f'A new report has been submitted by barangay {barangay}.\n\nBarangay: {barangay}\nSubject: {subject_details}\nDate: {date_reported}\nDescription: {description}'
             # send_sms(to_phone_number, notification_message)
 
-            return HttpResponseRedirect(reverse('brgyhomepage') + '?success=true')
+            return HttpResponseRedirect(reverse('brgyhomepage'))
         else:
             print(serializer.errors)
             messages.error(request, 'Report submission failed. Please check your data.')

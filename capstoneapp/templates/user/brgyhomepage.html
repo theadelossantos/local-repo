@@ -453,6 +453,14 @@
                     loadAllReports(currentPage);
                 }
             });
+
+            $('#exportAllPdfButton').click(function (e) {
+                e.preventDefault();
+                if (!paginationData.has_next | paginationData.has_next) {
+                exportAllReportsToPDF(allBarangays); 
+                }            
+            });
+            
             generatePagination(currentPage, paginationDataToday.total_pages); 
 
             function generatePagination(page, totalPages) {
@@ -606,6 +614,145 @@
             }, 2000)
             }
         });
+
+        async function exportAllReportsToPDF(allBarangays) {
+            try{
+                const response = await fetch('/get_all_reports_without_pagination/');
+                const allBarangays = await response.json();
+
+                if (!allBarangays || !allBarangays.length) {
+                    console.error('No reports found.');
+                    return;
+                }
+                
+                var doc = new jsPDF();
+                var startY = 20;
+                var logos = [
+                    "{% static 'capstoneapp/ibaanlogo1.png' %}",
+                    "{% static 'capstoneapp/ibaanlogo2.png' %}",
+                ];
+                var logoWidth = 20;
+                var centerX = doc.internal.pageSize.width / 2 - (logoWidth * 2) / 2;
+    
+                logos.forEach(function (logo, index) {
+                    doc.addImage(logo, 'PNG', centerX + index * logoWidth, startY, logoWidth, logoWidth);
+                });
+    
+                var headerText = "MUNICIPAL DISASTER RISK REDUCTION AND MANAGEMENT OFFICE";
+                doc.setFontSize(15);
+                var textWidth = doc.getStringUnitWidth(headerText) * doc.internal.getFontSize();
+                var pageWidth = doc.internal.pageSize.width;
+                var textX = (pageWidth - textWidth) / 2;
+                var headerY = startY + logoWidth + 7;
+                doc.setFont(undefined, 'bold');
+                doc.text(headerText, pageWidth / 2, headerY, 'center');
+    
+                var text = "BARANGAY REPORTS";
+                var textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize();
+                var textX = (pageWidth - textWidth) / 2;
+                var textY = doc.internal.pageSize.height / 2;
+    
+                doc.setFontSize(30);
+                doc.text(text, textX + 80, textY, { align: 'center' });
+    
+                for (let index = 0; index < allBarangays.length; index++) {
+                    var selectedReport = {
+                        subject: allBarangays[index].subject,
+                        date_reported: allBarangays[index].date_reported,
+                        description: allBarangays[index].description,
+                        location: allBarangays[index].location,
+                        attachment: allBarangays[index].attachment,
+                        barangay: allBarangays[index].barangay, 
+                        longitude: allBarangays[index].longitude,
+                        latitude: allBarangays[index].latitude,
+                        response_status: allBarangays[index].response_status
+                    };
+    
+                    doc.addPage();
+    
+    
+                    logos.forEach(function (logo, index) {
+                        doc.addImage(logo, 'PNG', centerX + index * logoWidth, startY, logoWidth, logoWidth);
+                    });
+    
+                    doc.setFontSize(15);
+                    var textWidth = doc.getStringUnitWidth(headerText) * doc.internal.getFontSize();
+                    var pageWidth = doc.internal.pageSize.width;
+                    var textX = (pageWidth - textWidth) / 2;
+                    var headerY = startY + logoWidth + 7;
+                    doc.setFont(undefined, 'bold');
+                    doc.text(headerText, pageWidth / 2, headerY, 'center');
+    
+                    var columns = ["Field", "Details"];
+                    var data = [
+                        ["Subject", selectedReport.subject],
+                        ["Date Reported", selectedReport.date_reported],
+                        ["Barangay", selectedReport.barangay],
+                        ["Description", selectedReport.description],
+                        ["Status", selectedReport.response_status],
+
+                    ];
+    
+                    var address = "";
+                    if (selectedReport.latitude && selectedReport.longitude) {
+                        try {
+                            address = await getAddressFromCoordinatesPDF(selectedReport.latitude, selectedReport.longitude);
+                        } catch (error) {
+                            console.error('Error fetching address:', error);
+                            address = "Error fetching address";
+                        }
+                    } else {
+                        address = "Coordinates not available";
+                    }
+                    data.push(["Location", address]);
+                    var columnWidths = [50, 100];
+                    var columnStyles = {
+                        0: { cellWidth: 50, halign: "left" },
+                        1: { cellWidth: 130, halign: "left" },
+                    };
+    
+                    doc.autoTable({
+                        head: [columns],
+                        body: data,
+                        theme: "striped",
+                        columnStyles: columnStyles,
+                        margin: { top: startY + logoWidth + 20 },
+                    });
+    
+                    if (selectedReport.attachment) {
+                        await new Promise((resolve) => {
+                            var img = new Image();
+                            img.crossOrigin = 'Anonymous';
+                            img.onload = function () {
+                                var canvas = document.createElement('canvas');
+                                var ctx = canvas.getContext('2d');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                ctx.drawImage(img, 0, 0);
+    
+                                var dataURL = canvas.toDataURL('image/png');
+                                var imgWidth = 100;
+                                var imgHeight = (img.height * imgWidth) / img.width;
+                                var imgX = 10;
+                                var imgY = doc.autoTable.previous.finalY + 10;
+                                doc.setFontSize(12);
+                                doc.text('Attachment:', imgX, imgY - 1);
+                                doc.addImage(dataURL, 'PNG', imgX, imgY, imgWidth, imgHeight);
+    
+                                resolve();
+                            };
+                            img.src = selectedReport.attachment;
+                        });
+                    }
+                }
+    
+                doc.save("all_reports.pdf");
+
+            } catch(error){
+                console.error('Error exporting reports:', error);
+
+            }
+        }
         
     </script>
     {% endblock %}

@@ -68,8 +68,7 @@ class Report(models.Model):
     time_reported = models.TimeField(auto_now_add=True, blank=True, null=True)
     latitude = models.DecimalField(max_digits=20, decimal_places=15, blank=True, null=True)
     longitude = models.DecimalField(max_digits=20, decimal_places=15, blank=True, null=True)
-    response_status = models.CharField(max_length=20, choices=(('Responded', 'Responded'), ('Declined', 'Declined')), null=True, blank=True)
-
+    response_status = models.CharField(max_length=20, choices=(('Responded', 'Responded'), ('Declined', 'Declined'), ('Pending', 'Pending')), null=True, blank=True)
     def __str__(self):
         return self.subject
     
