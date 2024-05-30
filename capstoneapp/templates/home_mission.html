@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disaster Risk Management</title>
+    <link rel="stylesheet" href="{% static 'home.css' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  
+  </head>
+  <body>
+    
+    <main>
+      {% block content %}
+      <section class="preparedness">
+        <div class="visionmission d-flex flex-row justify-content-center align-items-center">
+            <div class="vision text-center border border-dark p-4 rounded mt-3 mr-3 w-100">
+                <h1 style="font-weight: 700;">IBAAN HYMN</h1>
+                <p>
+                    I<br>
+                    Mabuhay, Mabuhay<br>
+                    Ibaan, Bayang minamahal <br>
+                    Bayang masagana<br>
+                    Sa halik ng araw.<br>
+                    II<br>
+                    Pinagmulang kasaysayan<br>
+                    Tunay na marangal<br>
+                    Hangari'y iyong kaunlaran<br>
+                    Bayan naming minamahal.<br>
+                    Kaming mga taga-Ibaan<br>
+                    May ngalang taglay<br>
+                    Diwang bayanihan<br>
+                    Kapag sa ami'y may iniatang<br>
+                    Sabay-sabay kami at ihahakbang, HEY!<br>
+                    (Ulitin ang I, II)<br>
+                    Hangari'y iyong kaunlaran<br>
+                    Bayan naming minamahal.<br>
+                    Hangari'y iyong kaunlaran<br>
+                    Bayan naming minamahal.</p>
+            </div>
+            <div class="d-flex flex-column">
+
+                <div class="vision text-center border border-dark p-4 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                      </svg>
+                    <h1 style="font-weight: 700;">VISION</h1>
+                    <p>To be a first-class municipality in 2028.</p>
+                </div>
+                <div class="mission text-center border border-dark p-4 rounded mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bullseye" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10zm0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
+                        <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                        <path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                      </svg>
+                    <h1 style="font-weight: 700;">MISSION</h1>
+                    <p>We are a highly competitive local government unit that shall be known for pioneering innovative programs that improve the quality of life of the constituents. We shall do this through:</p>
+                    <ol>
+                        <li>
+                            Pursuit of excellence in the local government systems.
+                        </li>
+                        <li>
+                            Responsiveness to the pressing needs of the municipality and embedding a strong sense of foresight in all the programs that shall be implemented.
+                        </li>
+                        <li>
+                            Uplifting the pride and well-being of the individuals and societies we serve.
+                        </li>
+                        <li>
+                            Adherence to the mandates of the national government.
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            
+        </div>
+        
+      </section>
+    </main>
+    <footer>
+      <nav class="footer">
+        <p>&copy; 2023 Disaster Risk Management</p>
+      </nav>
+    </footer>
+    {% endblock %}
+
+  </body>
+</html>

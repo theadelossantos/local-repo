@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MDRRMC Ibaan</title>
+    <link rel="stylesheet" href="{% static 'home.css' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.0/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.0.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light ">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto align-items-center">
+          <li class="nav-item active">
+            <a class="nav-link text-dark gov-link" href="https://www.gov.ph/">GOV PH</a>
+          </li>
+          <li class="nav-item active">
+              <li class="dropdown">
+                  <div class="dropdown show custom-dropdown no-focus-outline">
+                    <a class="btn btn-custom text-dark " href="{% url 'adminhomepage' %}" role="button" aria-haspopup="true" aria-expanded="false">
+                     Home          
+                    </a>
+                  </div>
+                </li>
+          </li>
+          <li class="nav-item">
+            <li class="dropdown">
+              <div class="dropdown show custom-dropdown no-focus-outline">
+                <a class="btn btn-secondary dropdown-toggle dropdown-color text-dark" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  About Us          
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                  <a class="dropdown-item" href="{% url 'admin_missionvision' %}">Mission and Vision</a>
+                  <a class="dropdown-item" href="{% url 'admin_barangays' %}" href="#">Barangays</a>
+                </div>
+              </div>
+            </li>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="{% url 'admin_contact' %}">Contact Us</a>
+          </li>
+          
+        </ul>
+
+        <span class="navbar-text ">
+          <li class="dropdown">
+            <div class="dropdown show custom-dropdown no-focus-outline">
+              <a class="btn btn-secondary dropdown-toggle dropdown-color text-dark" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" v style="vertical-align: middle;"iewBox="0 0 16 16">
+                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg> {{user.email}}           
+              </a>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <a class="dropdown-item" href="{% url 'register' %}">Add Account</a>
+                <a class="dropdown-item" href="{% url 'logout' %}" href="#">Logout</a>
+              </div>
+            </div>
+          </li>
+        </span>
+      </div>
+
+    </nav>
+</header>
+      <section>
+        <div class="report-container mt-3 d-flex flex-row justify-content-between align-items-center">
+              <h1>ADD ANNOUNCEMENT</h1>
+              
+              <div class="all_announcements">
+                <a href="{% url 'get_announcement' %}" class="btn btn-primary ml-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                  </svg>                     
+                    View All Announcements
+                </a>
+            </div>
+        </div>
+        {% for msg in messages %}
+            <div class="alert alert-success alert-dismissible fade show alert-fixed" role="alert">
+                <strong>{{msg}}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+        {% endfor %}
+        
+        
+        <div class="container-form align-items-center d-flex justify-content-center flex-column">
+            <form method="POST" action="{% url 'submit_announcement' %}">
+                {% csrf_token %}
+                <div class="desc-div">
+                    <div class="col">
+                      <label for="subject">Subject:</label>
+                      <input class="form-control" type="text" name="subject" required><br>
+                    </div>
+                    <div class="col">
+                      <label for="description">Description:</label>
+                      <textarea class="form-control" name="description" required></textarea><br>
+                    </div>
+                    <div class="col">
+                      <label for="barangay">Reported by:</label>
+                      <input type="text" class="form-control" name="reportedby" required><br>
+                    </div>
+                    <div class="col">
+                      <label for="date">Date:</label>
+                      <input class="form-control" type="date" name="date" required><br>
+                  </div>
+                    <label for="barangays">Barangay:</label><br>
+                    <div id="barangay-checkboxes" class="checkbox-grid">
+                      <input type="checkbox" name="all_barangays" value="all" id="allBarangays">
+                      <label for="allBarangays">All Barangays</label><br>
+
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-warning text-light btn-submit mt-3">Send Announcement</button>
+            </form>
+        </div>
+      </section>
+      <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: "{% url 'get_barangays' %}",
+                method: "GET",
+                dataType: "json",
+                success: function (data) {
+                    var checkboxes = "";
+                    data.forEach(function (barangay) {
+                        checkboxes += `<input type="checkbox" name="barangay" value="${barangay.id}" id="barangay${barangay.id}">
+                            <label for="barangay${barangay.id}">${barangay.barangay}</label><br>`;
+                    });
+                    $("#barangay-checkboxes").append(checkboxes);
+        
+                    $("#allBarangays").change(function () {
+                        var allBarangaysChecked = $(this).is(":checked");
+                        $("[name='barangay']").prop("checked", allBarangaysChecked);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching barangays: " + error);
+                }
+            });
+        });
+        </script>
+        
+        
+        
+        
+    
+    
+</body>
+</html>
