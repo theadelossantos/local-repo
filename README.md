@@ -1,4 +1,4 @@
-# SpmsCapstoneBackend
+# Documentation
 
 ## Create a virtual environment
 
