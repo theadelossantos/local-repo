@@ -25,7 +25,7 @@ from datetime import datetime
 from django.db.models import Q 
 from datetime import date
 from django.views.decorators.cache import cache_control
-from capstoneapp.decorators import mdrrmc_required
+from capstoneapp.decorators import mdrrmc_required, barangay_required
 from django.http import Http404
 from django.core.mail import send_mail
 from django.conf import settings
@@ -339,32 +339,39 @@ def flood(request):
 
 ###### BARANGAY #####
 
+@barangay_required
 def userflood_basics(request):
     return render(request, 'user/userflood_basics.html')
 
+@barangay_required
 def usertyph_basics(request):
     return render(request, 'user/usertyphoon_basics.html')
 
+@barangay_required
 def userearthquake_basics(request):
     return render(request, 'user/userearthquake_basics.html')
 
+@barangay_required
 def userlandslide_basics(request):
     return render(request, 'user/userlandslide_basics.html')
-    
 
+@barangay_required
 def missionvision(request):
     return render(request, 'user/user-missionvision.html')
 
+@barangay_required
 def barangays(request):
     return render(request, 'user/user_barangay.html')
 
+@barangay_required
 def user_contacts(request):
     return render(request, 'user/user_contacts.html')
 
+@barangay_required
 def add_report(request):
     return render(request, 'user/add_reports.html')
 
-
+@barangay_required
 def incident_reports(request):
     return render(request, 'user/incident_reports.html')
 
@@ -374,7 +381,8 @@ def brgyhomepage(request):
         return render(request, 'user/brgyhomepage.html')
     else:
         return HttpResponseForbidden("Access Denied")
-    
+
+@barangay_required
 def incident_reports(request):
     subjects = ["Incident Report"]
     reports = Report.objects.filter(subject__in=subjects).order_by('-date_reported')
@@ -408,7 +416,7 @@ def incident_reports(request):
 
     return render(request, 'user/incident_reports.html', context)
 
-
+@barangay_required
 def user_flood(request):
     subjects = ["Flood Report"]
     reports = Report.objects.filter(subject__in=subjects).order_by('-date_reported')
@@ -442,6 +450,7 @@ def user_flood(request):
 
     return render(request, 'user/user_flood.html', context)
 
+@barangay_required
 def user_typhoon(request):
     subjects = ["Typhoon Report"]
     reports = Report.objects.filter(subject__in=subjects).order_by('-date_reported')
@@ -476,6 +485,7 @@ def user_typhoon(request):
 
     return render(request, 'user/user_typhoon.html', context)
 
+@barangay_required
 def user_earthquake(request):
     subjects = ["Earthquake Report"]
     reports = Report.objects.filter(subject__in=subjects).order_by('-date_reported')
@@ -510,6 +520,7 @@ def user_earthquake(request):
 
     return render(request, 'user/user_earthquake.html', context)
 
+@barangay_required
 def user_landslide(request):
     subjects = ["Landslide Report"]
     reports = Report.objects.filter(subject__in=subjects).order_by('-date_reported')
@@ -543,6 +554,7 @@ def user_landslide(request):
 
     return render(request, 'user/user_landslide.html', context)
 
+@barangay_required
 def user_sit(request):
     subjects = ["Situational Report"]
     reports = Report.objects.filter(subject__in=subjects).order_by('-date_reported')
@@ -575,8 +587,10 @@ def user_sit(request):
 
     return render(request, 'user/user_sit.html', context)
 
+@barangay_required
 def get_userreports(request):
     return render(request, 'user/user_allreports.html')
+
 @api_view(['GET'])
 def user_allreports(request):
         date_param = request.GET.get('date', None)
@@ -670,6 +684,7 @@ def send_sms(to_phone_number, notification_message):
     else:
         print(f"Message failed with error: {response['messages'][0]['error-text']}")
 
+
 def submit_report(request):
     if request.method == 'POST':
         request.POST._mutable = True  
@@ -715,6 +730,7 @@ class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
 
+@barangay_required
 def get_user_announcements(request):
     if request.user.user_type == 'barangay':
         try:
@@ -822,6 +838,7 @@ def adminhomepage(request):
     else:
         return HttpResponseForbidden("Access Denied")
 
+@login_required(login_url='login')
 @api_view(['GET', 'POST'])
 def register(request):
     if request.method == 'POST':
@@ -903,6 +920,7 @@ def login_view(request):
 
 # def admin_sit_reports(request):
 #     return render(request, 'admin_sit_reports.html')
+
 @mdrrmc_required
 def admin_sit_reports(request):
     subjects = ["Situational Report"]
