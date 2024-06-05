@@ -70,7 +70,7 @@
 </header>
 <section>
   <div class="alert alert-danger alert-dismissible fade show alert-fixed" id="locationAlert" style="display: none;" role="alert">
-    You must locate the exact location in the map.
+    You must complete the details and locate the exact location in the map.
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -211,7 +211,15 @@ $(document).ready(function () {
               $("#latitude").val(e.latlng.lat); 
               $("#longitude").val(e.latlng.lng);
           });
+
+          $('.btn-submit').click(function(event) {
+            if ($('#latitude').val() === '' || $('#longitude').val() === '') {
+                event.preventDefault();
+                $('#locationAlert').show();
+            }
+        });
       });
+
 
 </script>
 
