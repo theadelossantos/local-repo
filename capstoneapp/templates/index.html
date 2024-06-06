@@ -37,7 +37,7 @@
         }
 
         .loading-text {
-            margin-left: 10px; /* Add some space between the spinner and text */
+            margin-left: 10px; 
         }
         </style>
         
@@ -50,7 +50,7 @@
             <div class="d-flex justify-content-center align-items-center">
                 <h1 style="font-weight: 700;">BARANGAY REPORTS</h1>
             </div>
-            <div class="flex">
+            <div class="d-flex">
                 <button id="exportAllPdfButton" class="btn btn-danger mb-2">
                     Export to PDF
                 </button>
@@ -772,13 +772,10 @@
         }
 
         window.addEventListener('load', () => {
-        // Hide loading screen when the page is loaded
             hideLoadingScreen();
-            // Check if loading screen was displayed after export PDF button click
             const wasLoadingScreenDisplayed = sessionStorage.getItem('loadingScreenDisplayed');
             if (wasLoadingScreenDisplayed === 'true') {
                 hideLoadingScreen();
-                // Clear the session storage variable
                 sessionStorage.removeItem('loadingScreenDisplayed');
             }
         });
