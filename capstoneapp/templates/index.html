@@ -21,6 +21,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7); 
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; 
+        }
+
+        .loading-text {
+            margin-left: 10px; /* Add some space between the spinner and text */
+        }
+        </style>
+        
     <body>
     {% block content %}
 
@@ -30,9 +50,15 @@
             <div class="d-flex justify-content-center align-items-center">
                 <h1 style="font-weight: 700;">BARANGAY REPORTS</h1>
             </div>
-            <button id="exportAllPdfButton" class="btn btn-danger mb-2">
-                Export to PDF
-            </button>
+            <div class="flex">
+                <button id="exportAllPdfButton" class="btn btn-danger mb-2">
+                    Export to PDF
+                </button>
+                <div class="spinner-overlay">
+                    <div class="spinner-border text-warning" role="status"></div>
+                    <span class="visually-hidden">Please wait while the reports are being exported...</span>
+                </div>
+            </div>
                 <div class="select-date mb-3">
                     <div class="d-flex flex-row w-100">
                         <div class="p-1">
@@ -169,6 +195,8 @@
 
 
     </main>
+   
+
     <!-- <footer>
       <nav class="footer">
         <p>&copy; 2023 Disaster Risk Management</p>
@@ -347,7 +375,7 @@
         });
 
         async function exportAllReportsToPDF(allBarangays) {
-            try{
+            try {
                 const response = await fetch('/get_all_reports_without_pagination/');
                 const allBarangays = await response.json();
 
@@ -364,11 +392,11 @@
                 ];
                 var logoWidth = 20;
                 var centerX = doc.internal.pageSize.width / 2 - (logoWidth * 2) / 2;
-    
+
                 logos.forEach(function (logo, index) {
                     doc.addImage(logo, 'PNG', centerX + index * logoWidth, startY, logoWidth, logoWidth);
                 });
-    
+
                 var headerText = "MUNICIPAL DISASTER RISK REDUCTION AND MANAGEMENT OFFICE";
                 doc.setFontSize(15);
                 var textWidth = doc.getStringUnitWidth(headerText) * doc.internal.getFontSize();
@@ -377,15 +405,15 @@
                 var headerY = startY + logoWidth + 7;
                 doc.setFont(undefined, 'bold');
                 doc.text(headerText, pageWidth / 2, headerY, 'center');
-    
+
                 var text = "BARANGAY REPORTS";
                 var textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize();
                 var textX = (pageWidth - textWidth) / 2;
                 var textY = doc.internal.pageSize.height / 2;
-    
+
                 doc.setFontSize(30);
                 doc.text(text, textX + 80, textY, { align: 'center' });
-    
+
                 for (let index = 0; index < allBarangays.length; index++) {
                     var selectedReport = {
                         subject: allBarangays[index].subject,
@@ -401,14 +429,14 @@
                         respondent_name: allBarangays[index].respondent_name
 
                     };
-    
+
                     doc.addPage();
-    
-    
+
+
                     logos.forEach(function (logo, index) {
                         doc.addImage(logo, 'PNG', centerX + index * logoWidth, startY, logoWidth, logoWidth);
                     });
-    
+
                     doc.setFontSize(15);
                     var textWidth = doc.getStringUnitWidth(headerText) * doc.internal.getFontSize();
                     var pageWidth = doc.internal.pageSize.width;
@@ -416,7 +444,7 @@
                     var headerY = startY + logoWidth + 7;
                     doc.setFont(undefined, 'bold');
                     doc.text(headerText, pageWidth / 2, headerY, 'center');
-    
+
                     var columns = ["Field", "Details"];
                     var data = [
                         ["Subject", selectedReport.subject],
@@ -428,11 +456,11 @@
                         ["Reported by", selectedReport.respondent_name],
 
                     ];
-    
+
                     var address = "";
                     if (selectedReport.latitude && selectedReport.longitude) {
                         try {
-                            address = await getAddressFromCoordinatesPDF(selectedReport.latitude, selectedReport.longitude);
+                            address = await getAddressFromCoordinates(selectedReport.latitude, selectedReport.longitude);
                         } catch (error) {
                             console.error('Error fetching address:', error);
                             address = "Error fetching address";
@@ -446,7 +474,7 @@
                         0: { cellWidth: 50, halign: "left" },
                         1: { cellWidth: 130, halign: "left" },
                     };
-    
+
                     doc.autoTable({
                         head: [columns],
                         body: data,
@@ -454,7 +482,7 @@
                         columnStyles: columnStyles,
                         margin: { top: startY + logoWidth + 20 },
                     });
-    
+
                     if (selectedReport.attachment) {
                         await new Promise((resolve) => {
                             var img = new Image();
@@ -465,7 +493,7 @@
                                 canvas.width = img.width;
                                 canvas.height = img.height;
                                 ctx.drawImage(img, 0, 0);
-    
+
                                 var dataURL = canvas.toDataURL('image/png');
                                 var imgWidth = 100;
                                 var imgHeight = (img.height * imgWidth) / img.width;
@@ -474,14 +502,14 @@
                                 doc.setFontSize(12);
                                 doc.text('Attachment:', imgX, imgY - 1);
                                 doc.addImage(dataURL, 'PNG', imgX, imgY, imgWidth, imgHeight);
-    
+
                                 resolve();
                             };
                             img.src = selectedReport.attachment;
                         });
                     }
                 }
-    
+
                 doc.save("all_reports.pdf");
 
             } catch(error){
@@ -489,7 +517,23 @@
 
             }
         }
-        
+
+        function getAddressFromCoordinates(latitude, longitude) {
+            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+
+            return fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.display_name;
+                    console.log('address', address);
+                    return address;
+                })
+                .catch(error => {
+                    console.error('Error fetching address:', error);
+                    return "Error fetching address";
+                });
+        }
+                
         let marker;
 
         function displayReportDetails(reportId) {
@@ -726,40 +770,35 @@
             const time = new Date(`2000-01-01T${timeString}`);
             return time.toLocaleTimeString('en-US', options);
         }
-        function getAddressFromCoordinates(latitude, longitude) {
-            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
 
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    const address = data.display_name;
-                    console.log('adress', address)
-                    $("#modalLocation").text(address); 
-                })
-                .catch(error => {
-                    console.error('Error fetching address:', error);
-                });
+        window.addEventListener('load', () => {
+        // Hide loading screen when the page is loaded
+            hideLoadingScreen();
+            // Check if loading screen was displayed after export PDF button click
+            const wasLoadingScreenDisplayed = sessionStorage.getItem('loadingScreenDisplayed');
+            if (wasLoadingScreenDisplayed === 'true') {
+                hideLoadingScreen();
+                // Clear the session storage variable
+                sessionStorage.removeItem('loadingScreenDisplayed');
+            }
+        });
+        
+        document.getElementById('exportAllPdfButton').addEventListener('click', async () => {
+            showLoadingScreen();
+            await exportAllReportsToPDF();
+            hideLoadingScreen();
+        });
+
+        
+
+        function showLoadingScreen() {
+            document.querySelector('.spinner-overlay').style.display = 'block'; // Show loading spinner
         }
-        // $(document).ready(function() {
-        //     const urlParams = new URLSearchParams(window.location.search);
-        //     const success = urlParams.get('success');
 
-        //     if (success === 'true') {
-            
-        //     const alertContent = 'Report submitted successfully.';
-        //     const alertBox = `<div class="alert alert-success alert-dismissible fade show alert-fixed" role="alert">${alertContent}
-        //         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        //         <span aria-hidden="true">&times;</span>
-        //         </button>
-        //     </div>`;
-        //     $('#alert-container').html(alertBox);
-
-        //     setTimeout(function(){
-        //         $('.alert').alert('close');
-        //     }, 2000)
-        //     }
-        // });
-
+        function hideLoadingScreen() {
+            document.querySelector('.spinner-overlay').style.display = 'none'; // Hide loading spinner
+        }
+        
 
     </script>
     {% endblock %}
